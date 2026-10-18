@@ -1,31 +1,23 @@
-# Study Notes — website E-learning tĩnh
+# Thư viện bài học — HTML, CSS và JavaScript thuần
 
-Website học trực tuyến dùng HTML5, CSS3 và JavaScript thuần. Dữ liệu khóa học được đọc động từ JSON; tiến độ cá nhân được lưu bằng LocalStorage. Không cần Node.js, framework hoặc bước build.
+Giao diện tối giản với nền sáng, lưới card vuông 3 cột trên desktop, thumbnail video làm nền, tiêu đề trắng lớn, breadcrumb nhỏ và nút play mở video trong modal.
 
 ## Chạy website
 
-Do trình duyệt hạn chế `fetch()` khi mở file `index.html` trực tiếp, hãy chạy qua máy chủ HTTP tĩnh.
+Vì website tải dữ liệu từ các file JSON bằng `fetch`, hãy chạy qua máy chủ tĩnh thay vì mở trực tiếp `index.html`.
 
-1. Giải nén thư mục `e-learning`.
-2. Mở terminal tại thư mục này.
-3. Chạy:
+```bash
+cd e-learning
+python3 -m http.server 8000
+```
 
-   ```bash
-   python3 -m http.server 8000
-   ```
-
-4. Mở <http://localhost:8000> trong trình duyệt.
-
-Có thể dùng tiện ích Live Server của VS Code thay cho lệnh trên. Không cần cài Node.js.
+Mở <http://localhost:8000> trong trình duyệt.
 
 ## Cấu trúc dự án
 
 ```text
 e-learning/
 ├── index.html
-├── README.md
-├── assets/
-│   └── icons/
 ├── css/
 │   └── styles.css
 ├── js/
@@ -38,68 +30,32 @@ e-learning/
     └── N3.json
 ```
 
-`N2.json` và `N3.json` được giữ nguyên nội dung nguồn. `data/index.json` là registry để website biết tên khóa học và đường dẫn tới dữ liệu.
-
 ## Thêm khóa học mới
 
-1. Chép file JSON vào thư mục `data/`, ví dụ `N1.json`.
-2. Mở `data/index.json` và thêm một phần tử:
+1. Đặt file JSON khóa học trong `data/`.
+2. Thêm mục vào `data/index.json` theo định dạng:
 
-   ```json
-   {
-     "id": "n1",
-     "title": "JLPT N1",
-     "file": "./data/N1.json"
-   }
-   ```
+```json
+[
+  { "id": "n2", "title": "JLPT N2", "file": "./data/N2.json" },
+  { "id": "n3", "title": "JLPT N3", "file": "./data/N3.json" }
+]
+```
 
-3. Lưu file và tải lại trang. Không cần sửa JavaScript nếu file tuân theo cấu trúc dữ liệu tương tự.
+Mỗi file dữ liệu có thể chứa nhiều cấp nhóm như `cats`, `lessons` và danh sách video trong `list_lectures`. Trang sẽ duyệt các cấp này để tạo card và breadcrumb. File JSON nguồn được giữ nguyên.
 
-Website hỗ trợ cấu trúc đang có trong dữ liệu: `root[] → cats[] → lessons[] → list_lectures[]`, đồng thời xử lý `lessons[]`, `cats[]` và `list_lectures[]` nếu xuất hiện ở những cấp khác. Các trường thiếu hoặc `null` không làm hỏng toàn bộ trang.
+## Giao diện và hành vi
 
-## Tính năng
+- Lưới card vuông: 3 cột desktop, 2 cột ở màn hình nhỏ hơn.
+- Card dùng thumbnail Vimeo làm ảnh nền; nếu thiếu Vimeo nhưng có YouTube ID thì dùng thumbnail YouTube.
+- Tiêu đề bài học màu trắng, chữ lớn; breadcrumb cấp nội dung nằm ngay bên dưới.
+- Bấm card/nút play để mở video trong modal; nhấn `Esc` hoặc nút đóng để thoát.
+- Chọn khóa học N2/N3 ở thanh trên cùng.
+- Tìm kiếm theo tên bài học hoặc breadcrumb, không phân biệt dấu tiếng Việt.
+- Không có tag, bộ lọc, thanh tiến trình hay trạng thái hoàn thành trên giao diện.
+- Một số bài thiếu ID video hoặc thumbnail có thể hiện nền dự phòng; quyền phát còn phụ thuộc tình trạng video và thiết lập nhúng của nhà cung cấp.
 
-- Chọn khóa học từ `data/index.json`.
-- Cây nội dung có thể mở rộng/thu gọn.
-- Tìm kiếm theo tên bài và đường dẫn phân cấp, không phân biệt dấu.
-- Lọc tất cả, miễn phí, đã học, chưa học, có video và mục không có video.
-- Chuyển chế độ lưới/danh sách.
-- Đánh dấu hoàn thành và lưu theo khóa học + ID bài học trong LocalStorage.
-- Tiến độ tổng quan.
-- Thumbnail Vimeo qua oEmbed, lazy-load bằng `IntersectionObserver`, cache trong bộ nhớ và LocalStorage.
-- Modal Vimeo, tự động yêu cầu phát, hỗ trợ fullscreen và loại bỏ iframe khi đóng.
-- Responsive cho desktop, tablet và điện thoại.
+## Lưu ý
 
-## Vimeo và thumbnail
-
-Website chỉ dùng `vimeo_id` để tạo trình phát Vimeo. Mã có dạng `1132535281?h=...` được giữ lại cả tham số `h` khi tạo URL player. `video_id` và `youtube_id` không được dùng thay thế cho `vimeo_id`.
-
-Thumbnail được yêu cầu từ Vimeo oEmbed (`https://vimeo.com/api/oembed.json`). Tính năng này phụ thuộc vào quyền truy cập mạng, CORS, khả năng phản hồi của Vimeo và quyền riêng tư/nhúng của từng video. Nếu không lấy được thumbnail, website hiển thị placeholder; giao diện vẫn hoạt động. Nếu video bị giới hạn domain, riêng tư hoặc chủ video tắt nhúng, iframe có thể không phát được dù URL được tạo đúng.
-
-Trình duyệt có thể chặn autoplay có âm thanh; người dùng có thể nhấn Play trong trình phát. Website không tự đánh dấu hoàn thành khi mở video.
-
-## Lưu ý dữ liệu và quyền truy cập
-
-- JSON nguồn chỉ được đọc, không bị sửa đổi bởi website.
-- Trạng thái hoàn thành cá nhân được ghi riêng trong LocalStorage của trình duyệt hiện tại.
-- Trường `is_lock: true` chặn mở video ở giao diện. Trường `free` chỉ dùng để hiển thị/lọc nhãn; website tĩnh không thay thế hệ thống xác thực hoặc kiểm soát quyền truy cập phía máy chủ.
-- Trạng thái học đã lưu trên một trình duyệt không tự đồng bộ sang thiết bị khác.
-
-## Khắc phục lỗi
-
-- **Không tải được JSON:** kiểm tra đường dẫn và tên file trong `data/index.json`; chạy bằng HTTP server, không mở trực tiếp bằng `file://`.
-- **Danh sách trống:** xác nhận JSON hợp lệ và có mảng ở cấp gốc.
-- **Không có thumbnail:** kiểm tra kết nối mạng, quyền truy cập video và phản hồi của Vimeo oEmbed. Placeholder là hành vi dự phòng có chủ đích.
-- **Video không phát:** kiểm tra quyền nhúng của video, tham số riêng tư `h`, chính sách domain của chủ video và thử nút Play trong iframe.
-- **Tiến độ không lưu:** kiểm tra cài đặt lưu dữ liệu của trình duyệt/Private Browsing; LocalStorage có thể bị chặn hoặc xóa khi đóng phiên.
-
-## Checklist kiểm thử thủ công
-
-- [ ] Mở website qua `http://localhost:8000`.
-- [ ] Chọn JLPT N2 và JLPT N3; xác nhận cây nội dung đổi theo khóa.
-- [ ] Tìm kiếm tên bài và thử từng bộ lọc.
-- [ ] Chọn một bài video, xác nhận URL Vimeo giữ tham số `h`.
-- [ ] Đóng modal bằng nút ×, phím Escape và nhấn nền ngoài.
-- [ ] Đánh dấu một bài hoàn thành, tải lại trang và xác nhận trạng thái vẫn còn.
-- [ ] Chọn một bài kiểm tra không có video và xác nhận không có iframe.
-- [ ] Kiểm tra bố cục trên màn hình nhỏ.
+- Vimeo oEmbed cần kết nối mạng và có thể không cung cấp thumbnail với video riêng tư hoặc bị giới hạn nhúng.
+- Không sửa hoặc ghi đè các JSON nguồn khi website chạy.

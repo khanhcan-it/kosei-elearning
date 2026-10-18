@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#2563eb">
-  <meta name="description" content="Study Notes — không gian học tập trực tuyến tối giản.">
-  <title>Study Notes — E-learning</title>
+  <meta name="theme-color" content="#f8f8f6">
+  <meta name="description" content="Thư viện bài học — tìm và mở bài học nhanh chóng.">
+  <title>Thư viện bài học</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css">
   <script src="./js/vimeo.js" defer></script>
   <script src="./js/data.js" defer></script>
@@ -16,8 +16,10 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#" aria-label="Study Notes - trang chủ">
-      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h7"/></svg></span>
+    <a class="brand" href="#top" aria-label="Thư viện bài học">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h6"/></svg>
+      </span>
       <span>Study Notes</span>
     </a>
     <div class="topbar-tools">
@@ -25,83 +27,38 @@
         <span class="sr-only">Chọn khóa học</span>
         <select id="courseSelect" aria-label="Chọn khóa học"><option>Đang tải khóa học…</option></select>
       </label>
-      <label class="searchbox">
+      <label class="searchbox" id="searchBox">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg>
+        <span class="sr-only">Tìm bài học</span>
         <input id="searchInput" type="search" placeholder="Tìm bài học…" autocomplete="off" aria-label="Tìm bài học">
-        <kbd>⌘ K</kbd>
       </label>
-      <button class="icon-button mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Mở danh mục" aria-expanded="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
     </div>
   </header>
 
-  <div class="app-shell">
-    <aside class="sidebar" id="sidebar" aria-label="Danh mục khóa học">
-      <div class="sidebar-heading"><span>NỘI DUNG HỌC</span><button id="collapseAllButton" class="text-button" type="button">Thu gọn</button></div>
-      <div id="courseTree" class="course-tree"><div class="tree-loading"><span class="spinner"></span> Đang tải nội dung…</div></div>
-      <div class="sidebar-footer"><span class="status-dot"></span> Tiến độ được lưu trên thiết bị này</div>
-    </aside>
-    <main class="main-content">
-      <div id="notice" class="notice" role="status" hidden></div>
-      <section class="welcome-panel">
-        <div class="welcome-copy">
-          <div class="eyebrow"><span class="eyebrow-dot"></span> YOUR LEARNING SPACE</div>
-          <h1 id="pageTitle">Chào mừng bạn trở lại</h1>
-          <p id="pageSubtitle">Chọn một phần học để bắt đầu hành trình hôm nay.</p>
-        </div>
-        <div class="welcome-art" aria-hidden="true">
-          <div class="art-page"><span></span><span></span><span></span><span></span></div>
-          <div class="art-check">✓</div><div class="art-spark">✦</div>
-        </div>
-      </section>
-
-      <section class="progress-panel" aria-label="Tiến độ học tập">
-        <div class="progress-copy">
-          <div class="progress-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5m0 14h16M7 15l4-4 3 2 5-6"/></svg></div>
-          <div><div class="metric-label">TIẾN ĐỘ HỌC TẬP</div><div class="progress-summary"><strong id="progressPercent">0%</strong><span id="progressText">0 / 0 bài đã hoàn thành</span></div></div>
-        </div>
-        <div class="progress-track"><span id="progressBar"></span></div>
-      </section>
-
-      <div class="content-toolbar">
-        <div>
-          <div class="breadcrumb" id="breadcrumb"><span>Tất cả nội dung</span></div>
-          <h2 id="sectionTitle">Tất cả bài học</h2>
-          <p id="sectionMeta" class="section-meta">Đang tải dữ liệu…</p>
-        </div>
-        <div class="view-actions">
-          <label class="filter-select"><span class="sr-only">Lọc bài học</span>
-            <select id="filterSelect" aria-label="Lọc bài học">
-              <option value="all">Tất cả bài học</option>
-              <option value="free">Miễn phí</option>
-              <option value="learned">Đã hoàn thành</option>
-              <option value="unlearned">Chưa hoàn thành</option>
-              <option value="video">Có video</option>
-              <option value="no-video">Bài kiểm tra / tài liệu</option>
-            </select>
-          </label>
-          <div class="view-toggle" aria-label="Kiểu hiển thị">
-            <button class="view-button active" id="gridViewButton" type="button" aria-label="Hiển thị dạng lưới" title="Dạng lưới"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></button>
-            <button class="view-button" id="listViewButton" type="button" aria-label="Hiển thị dạng danh sách" title="Dạng danh sách"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
-          </div>
-        </div>
+  <main id="top" class="main-content">
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow" id="currentCourse">THƯ VIỆN BÀI HỌC</p>
+        <h1>Thư viện bài học</h1>
       </div>
+      <p id="resultCount" class="result-count" aria-live="polite"></p>
+    </section>
 
-      <div id="lessonList" class="lesson-grid" aria-live="polite">
-        <div class="empty-state"><span class="spinner"></span><p>Đang chuẩn bị bài học…</p></div>
-      </div>
-      <footer class="main-footer"><span>Made for focused learning</span><span id="resultCount"></span></footer>
-    </main>
-  </div>
+    <div id="notice" class="notice" role="status" hidden></div>
+    <section id="lessonList" class="lesson-grid" aria-label="Danh sách bài học" aria-live="polite">
+      <div class="empty-state"><span class="spinner"></span><p>Đang tải bài học…</p></div>
+    </section>
+    <footer class="main-footer">Học theo cách của bạn.</footer>
+  </main>
 
-  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
   <div class="modal-backdrop" id="videoModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
-    <div class="video-dialog">
-      <div class="video-dialog-header"><div><span class="modal-kicker">ĐANG HỌC</span><h2 id="modalTitle">Bài học</h2></div><button id="closeModalButton" class="icon-button close-modal" type="button" aria-label="Đóng video">×</button></div>
+    <section class="video-dialog">
+      <header class="video-dialog-header">
+        <h2 id="modalTitle">Bài học</h2>
+        <button id="closeModalButton" class="close-modal" type="button" aria-label="Đóng video">×</button>
+      </header>
       <div id="videoFrameHost" class="video-frame-host"></div>
-      <div class="video-dialog-footer"><span>Video được phát từ Vimeo</span><span>Nhấn <kbd>Esc</kbd> để đóng</span></div>
-    </div>
+    </section>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
