@@ -1,0 +1,12 @@
+[
+  {
+    "id": "n2",
+    "title": "JLPT N2",
+    "file": "./data/N2.json"
+  },
+  {
+    "id": "n3",
+    "title": "JLPT N3",
+    "file": "./data/N3.json"
+  }
+]
