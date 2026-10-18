@@ -14,7 +14,8 @@
     modalTitle: $("#modalTitle"),
     frameHost: $("#videoFrameHost"),
     closeModal: $("#closeModalButton"),
-    toast: $("#toast")
+    toast: $("#toast"),
+    categoryNav: $("#categoryNav")
   };
 
   const state = {
@@ -22,21 +23,10 @@
     course: null,
     lessons: [],
     query: "",
+    category: "Tất cả",
     lastFocused: null,
     toastTimer: null
   };
-  const thumbnailJobs = new WeakMap();
-  const thumbnailObserver = "IntersectionObserver" in window
-    ? new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return;
-          thumbnailObserver.unobserve(entry.target);
-          const job = thumbnailJobs.get(entry.target);
-          if (job) loadThumbnail(job.lesson, entry.target, job.placeholder, job.index);
-        });
-      }, { rootMargin: "240px" })
-    : null;
-
   function text(value) {
     return String(value == null ? "" : value).trim();
   }
@@ -65,6 +55,16 @@
     return null;
   }
 
+  function inferSection(title, path) {
+    const value = normalized([title, ...path].join(" "));
+    if (/kanji|han tu/.test(value)) return "Kanji";
+    if (/ngu phap|grammar/.test(value)) return "Ngữ pháp";
+    if (/doc hieu|reading/.test(value)) return "Đọc hiểu";
+    if (/nghe|listening/.test(value)) return "Nghe hiểu";
+    if (/tu vung|vocabulary/.test(value)) return "Từ vựng";
+    return "Khác";
+  }
+
   function loadLessons(data) {
     const lessons = [];
 
@@ -82,7 +82,8 @@
             title: getLessonTitle(lecture, index),
             breadcrumb: path.join(" / "),
             searchText: normalized([getLessonTitle(lecture, index), ...path].join(" ")),
-            source: getVideoSource(lecture)
+            source: getVideoSource(lecture),
+            section: inferSection(getLessonTitle(lecture, index), path)
           });
         });
       }
@@ -124,6 +125,7 @@
     if (!course) return;
     state.course = course;
     state.query = "";
+    state.category = "Tất cả";
     els.search.value = "";
     els.currentCourse.textContent = course.title.toLocaleUpperCase("vi");
     els.notice.hidden = true;
@@ -132,6 +134,7 @@
     try {
       const data = await CourseData.loadCourse(course);
       state.lessons = loadLessons(data);
+      renderCategoryNav();
       renderLessons();
     } catch (error) {
       showNotice("Không thể tải dữ liệu “" + course.title + "”: " + error.message);
@@ -141,12 +144,10 @@
 
   function visibleLessons() {
     const query = normalized(state.query);
-    if (!query) return state.lessons;
-    return state.lessons.filter(lesson => lesson.searchText.includes(query));
+    return state.lessons.filter(lesson => (!query || lesson.searchText.includes(query)) && (state.category === "Tất cả" || lesson.section === state.category));
   }
 
   function showLoading() {
-    if (thumbnailObserver) thumbnailObserver.disconnect();
     els.lessonList.replaceChildren();
     const box = document.createElement("div");
     box.className = "empty-state";
@@ -155,7 +156,6 @@
   }
 
   function showEmpty(title, description) {
-    if (thumbnailObserver) thumbnailObserver.disconnect();
     els.lessonList.replaceChildren();
     const box = document.createElement("div");
     box.className = "empty-state";
@@ -170,7 +170,6 @@
 
   function renderLessons() {
     const lessons = visibleLessons();
-    if (thumbnailObserver) thumbnailObserver.disconnect();
     els.lessonList.replaceChildren();
     els.resultCount.textContent = state.query
       ? lessons.length + " kết quả"
@@ -186,85 +185,41 @@
     els.lessonList.append(fragment);
   }
 
-  function createLessonCard(lesson, index) {
-    const article = document.createElement("article");
-    article.className = "lesson-card" + (lesson.source ? "" : " no-video");
+  function renderCategoryNav() {
+    const preferred = ["Từ vựng", "Kanji", "Ngữ pháp", "Đọc hiểu", "Nghe hiểu", "Khác"];
+    const available = new Set(state.lessons.map(item => item.section));
+    const categories = ["Tất cả", ...preferred.filter(item => available.has(item))];
+    els.categoryNav.replaceChildren();
+    categories.forEach(category => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "category-tab" + (state.category === category ? " active" : "");
+      button.textContent = category;
+      button.addEventListener("click", () => { state.category = category; renderCategoryNav(); renderLessons(); });
+      els.categoryNav.append(button);
+    });
+  }
 
+  function createLessonCard(lesson) {
+    const article = document.createElement("article");
+    article.className = "lesson-card section-" + ({"Từ vựng":"vocab","Kanji":"kanji","Ngữ pháp":"grammar","Đọc hiểu":"reading","Nghe hiểu":"listening","Khác":"other"}[lesson.section] || "other");
     const cover = document.createElement("button");
     cover.type = "button";
     cover.className = "lesson-cover";
     cover.setAttribute("aria-label", lesson.source ? "Phát " + lesson.title : lesson.title + " — chưa có video");
-    if (!lesson.source) cover.disabled = true;
-
-    const imageSlot = document.createElement("span");
-    imageSlot.className = "lesson-image-slot";
-    imageSlot.setAttribute("aria-hidden", "true");
-    const placeholder = document.createElement("span");
-    placeholder.className = "lesson-placeholder";
-    placeholder.innerHTML = iconVideo();
-    imageSlot.append(placeholder);
-    cover.append(imageSlot);
-
-    const copy = document.createElement("span");
-    copy.className = "card-copy";
-    const title = document.createElement("span");
-    title.className = "lesson-title";
-    title.textContent = lesson.title;
-    const breadcrumb = document.createElement("span");
-    breadcrumb.className = "lesson-breadcrumb";
-    breadcrumb.textContent = lesson.breadcrumb || (state.course ? state.course.title : "Bài học");
-    copy.append(title, breadcrumb);
-    cover.append(copy);
-
-    if (lesson.source) {
-      const play = document.createElement("span");
-      play.className = "play-button";
-      play.setAttribute("aria-hidden", "true");
-      play.innerHTML = iconPlay();
-      cover.append(play);
-      cover.addEventListener("click", () => {
-        if (lesson.data.is_lock === true) {
-          showToast("Bài học này đang bị khóa.");
-          return;
-        }
-        openVideo(lesson);
-      });
+    if (!lesson.source || lesson.data.is_lock === true) cover.disabled = true;
+    const copy = document.createElement("span"); copy.className = "card-copy";
+    const section = document.createElement("span"); section.className = "section-label"; section.textContent = lesson.section;
+    const title = document.createElement("span"); title.className = "lesson-title"; title.textContent = lesson.title;
+    const breadcrumb = document.createElement("span"); breadcrumb.className = "lesson-breadcrumb";
+    breadcrumb.textContent = [state.course ? state.course.title : "", lesson.section, lesson.breadcrumb].filter(Boolean).join(" / ");
+    copy.append(section, title, breadcrumb); cover.append(copy);
+    const sketch = document.createElement("span"); sketch.className = "sketch-lines"; sketch.setAttribute("aria-hidden", "true"); cover.append(sketch);
+    if (lesson.source && lesson.data.is_lock !== true) {
+      const play = document.createElement("span"); play.className = "play-button"; play.setAttribute("aria-hidden", "true"); play.innerHTML = iconPlay(); cover.append(play);
+      cover.addEventListener("click", () => openVideo(lesson));
     }
-
-    article.append(cover);
-    thumbnailJobs.set(imageSlot, { lesson, placeholder, index });
-    if (thumbnailObserver) thumbnailObserver.observe(imageSlot);
-    else loadThumbnail(lesson, imageSlot, placeholder, index);
-    return article;
-  }
-
-  async function loadThumbnail(lesson, imageSlot, placeholder, index) {
-    let url = null;
-    if (lesson.source && lesson.source.type === "vimeo") {
-      url = await window.VimeoUtils.thumbnail(lesson.source.value);
-    }
-    if (!url && lesson.source && lesson.source.type === "youtube") {
-      url = "https://img.youtube.com/vi/" + encodeURIComponent(lesson.source.value) + "/hqdefault.jpg";
-    }
-    if (!url || !imageSlot.isConnected) {
-      if (placeholder && placeholder.isConnected) placeholder.setAttribute("title", "Chưa tải được thumbnail");
-      return;
-    }
-
-    const image = document.createElement("img");
-    image.className = "lesson-image";
-    image.alt = "";
-    image.loading = index < 6 ? "eager" : "lazy";
-    image.decoding = "async";
-    image.src = url;
-    image.addEventListener("load", () => {
-      if (placeholder && placeholder.isConnected) placeholder.remove();
-    }, { once: true });
-    image.addEventListener("error", () => {
-      image.remove();
-      if (placeholder && placeholder.isConnected) placeholder.setAttribute("title", "Thumbnail không khả dụng");
-    }, { once: true });
-    imageSlot.insertBefore(image, imageSlot.firstChild);
+    article.append(cover); return article;
   }
 
   function openVideo(lesson) {

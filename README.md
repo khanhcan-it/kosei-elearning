@@ -1,39 +1,28 @@
-# Thư viện bài học — HTML, CSS và JavaScript thuần
+# Study Notes — thư viện bài học
 
-Giao diện tối giản với nền sáng, lưới card vuông 3 cột trên desktop, thumbnail video làm nền, tiêu đề trắng lớn, breadcrumb nhỏ và nút play mở video trong modal.
+Website tĩnh dùng HTML, CSS và JavaScript thuần, hiển thị dữ liệu từ các file JSON.
+
+## Giao diện
+- Nền giấy kẻ được tạo bằng CSS, không cần ảnh nền.
+- Card bài học dạng sketch với màu pastel ổn định theo section (Từ vựng, Kanji, Ngữ pháp, Đọc hiểu, Nghe hiểu).
+- Không có sidebar, thumbnail video, tag hoặc tiến trình học.
+- Chọn khóa học ở thanh đầu trang; chọn danh mục bằng các tab ngang.
+- Lưới 3 cột trên desktop và tablet; 1 cột trên mobile.
+- Card có tiêu đề, breadcrumb và nút play để mở video trong modal.
+- Tìm kiếm theo tiêu đề và đường dẫn danh mục, không phân biệt dấu tiếng Việt.
 
 ## Chạy website
-
-Vì website tải dữ liệu từ các file JSON bằng `fetch`, hãy chạy qua máy chủ tĩnh thay vì mở trực tiếp `index.html`.
+Do trình duyệt thường chặn `fetch()` file JSON khi mở trực tiếp bằng `file://`, hãy chạy qua máy chủ tĩnh. Từ thư mục `e-learning`:
 
 ```bash
-cd e-learning
 python3 -m http.server 8000
 ```
 
-Mở <http://localhost:8000> trong trình duyệt.
+Mở http://localhost:8000.
 
-## Cấu trúc dự án
-
-```text
-e-learning/
-├── index.html
-├── css/
-│   └── styles.css
-├── js/
-│   ├── app.js
-│   ├── data.js
-│   └── vimeo.js
-└── data/
-    ├── index.json
-    ├── N2.json
-    └── N3.json
-```
-
-## Thêm khóa học mới
-
-1. Đặt file JSON khóa học trong `data/`.
-2. Thêm mục vào `data/index.json` theo định dạng:
+## Thêm khóa học
+1. Thêm file JSON vào thư mục `data/`.
+2. Đăng ký file trong `data/index.json` theo cấu trúc:
 
 ```json
 [
@@ -42,20 +31,4 @@ e-learning/
 ]
 ```
 
-Mỗi file dữ liệu có thể chứa nhiều cấp nhóm như `cats`, `lessons` và danh sách video trong `list_lectures`. Trang sẽ duyệt các cấp này để tạo card và breadcrumb. File JSON nguồn được giữ nguyên.
-
-## Giao diện và hành vi
-
-- Lưới card vuông: 3 cột desktop, 2 cột ở màn hình nhỏ hơn.
-- Card dùng thumbnail Vimeo làm ảnh nền; nếu thiếu Vimeo nhưng có YouTube ID thì dùng thumbnail YouTube.
-- Tiêu đề bài học màu trắng, chữ lớn; breadcrumb cấp nội dung nằm ngay bên dưới.
-- Bấm card/nút play để mở video trong modal; nhấn `Esc` hoặc nút đóng để thoát.
-- Chọn khóa học N2/N3 ở thanh trên cùng.
-- Tìm kiếm theo tên bài học hoặc breadcrumb, không phân biệt dấu tiếng Việt.
-- Không có tag, bộ lọc, thanh tiến trình hay trạng thái hoàn thành trên giao diện.
-- Một số bài thiếu ID video hoặc thumbnail có thể hiện nền dự phòng; quyền phát còn phụ thuộc tình trạng video và thiết lập nhúng của nhà cung cấp.
-
-## Lưu ý
-
-- Vimeo oEmbed cần kết nối mạng và có thể không cung cấp thumbnail với video riêng tư hoặc bị giới hạn nhúng.
-- Không sửa hoặc ghi đè các JSON nguồn khi website chạy.
+Mỗi file JSON giữ nguyên cấu trúc dữ liệu nguồn. Thẻ bài học dùng `lec_title`, các nhánh `cats`/`lessons` và `list_lectures` để dựng tiêu đề và breadcrumb. Video ưu tiên Vimeo, sau đó dùng YouTube nếu có mã video hợp lệ. Bài không có video hoặc bị khóa sẽ không mở trình phát.

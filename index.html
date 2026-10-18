@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="vi">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,21 +15,30 @@
   <script src="./js/data.js" defer></script>
   <script src="./js/app.js" defer></script>
 </head>
+
 <body>
   <header class="topbar">
     <a class="brand" href="#top" aria-label="Thư viện bài học">
       <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h6"/></svg>
+        <svg viewBox="0 0 24 24">
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z" />
+          <path d="M4 5.5v16M8 7h8M8 11h6" />
+        </svg>
       </span>
       <span>Study Notes</span>
     </a>
     <div class="topbar-tools">
       <label class="course-picker">
         <span class="sr-only">Chọn khóa học</span>
-        <select id="courseSelect" aria-label="Chọn khóa học"><option>Đang tải khóa học…</option></select>
+        <select id="courseSelect" aria-label="Chọn khóa học">
+          <option>Đang tải khóa học…</option>
+        </select>
       </label>
       <label class="searchbox" id="searchBox">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="10.8" cy="10.8" r="6.8" />
+          <path d="m16 16 4.5 4.5" />
+        </svg>
         <span class="sr-only">Tìm bài học</span>
         <input id="searchInput" type="search" placeholder="Tìm bài học…" autocomplete="off" aria-label="Tìm bài học">
       </label>
@@ -44,10 +54,17 @@
       <p id="resultCount" class="result-count" aria-live="polite"></p>
     </section>
 
+    <nav id="categoryNav" class="category-nav" aria-label="Danh mục bài học"></nav>
     <div id="notice" class="notice" role="status" hidden></div>
-    <section id="lessonList" class="lesson-grid" aria-label="Danh sách bài học" aria-live="polite">
-      <div class="empty-state"><span class="spinner"></span><p>Đang tải bài học…</p></div>
-    </section>
+
+    <div class="scoller">
+      <section id="lessonList" class="lesson-grid" aria-label="Danh sách bài học" aria-live="polite">
+        <div class="empty-state"><span class="spinner"></span>
+          <p>Đang tải bài học…</p>
+        </div>
+      </section>
+    </div>
+
     <footer class="main-footer">Học theo cách của bạn.</footer>
   </main>
 
@@ -62,4 +79,5 @@
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
+
 </html>
